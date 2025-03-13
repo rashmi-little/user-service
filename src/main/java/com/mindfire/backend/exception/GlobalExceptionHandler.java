@@ -4,6 +4,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -66,5 +67,31 @@ public class GlobalExceptionHandler {
         } else {
             return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST,"A database constraint was violated. Please try again.");
         }
+    }
+
+    /**
+     * Handles {@link RoleNotFoundException} and returns a {@link ProblemDetail} with HTTP 404 status
+     * and the exception message as the detail.
+     *
+     * @param ex the {@link RoleNotFoundException} to handle
+     * @return a {@link ProblemDetail} with status 404 and the exception message
+     */
+    @ExceptionHandler(RoleNotFoundException.class)
+    public ProblemDetail handleIfRoleNotFound(RoleNotFoundException ex){
+        return ProblemDetail.forStatusAndDetail(HttpStatus.valueOf(404),ex.getMessage());
+    }
+
+
+
+    /**
+     * Handles {@link BadCredentialsException} and returns a {@link ProblemDetail} with HTTP 401 status
+     * indicating incorrect username or password.
+     *
+     * @param ex the {@link BadCredentialsException} to handle
+     * @return a {@link ProblemDetail} with status 401 and an authentication failure message
+     */
+    @ExceptionHandler(BadCredentialsException.class)
+    public ProblemDetail handleIfBadCredentials(BadCredentialsException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, "Invalid email  or password");
     }
 }

@@ -30,7 +30,7 @@ public class JwtTokenProvider {
      * @return A JWT token as a String.
      */
     public String generateToken(Authentication authentication) {
-        String username = authentication.getName();
+        String email = authentication.getName();
         List<String> roles = authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
 
         Date currentDate = new Date();
@@ -38,7 +38,7 @@ public class JwtTokenProvider {
         Date expireDate = new Date(currentDate.getTime() + jwtExpirationDate);
 
         String token = Jwts.builder()
-                .setSubject(username)
+                .setSubject(email)
                 .setIssuedAt(new Date())
                 .claim("roles",roles)
                 .setExpiration(expireDate)

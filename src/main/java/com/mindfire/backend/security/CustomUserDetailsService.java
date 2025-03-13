@@ -20,13 +20,13 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final UserRepository userRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException {
-        User user = userRepository.findByUserName(userName).orElseThrow(() -> new UsernameNotFoundException(ValidatorConstants.USER_NAME_NOT_FOUND));
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException(ValidatorConstants.USER_EMAIL_NOT_FOUND));
 
         return new UserDetails() {
             @Override
             public Collection<? extends GrantedAuthority> getAuthorities() {
-                return List.of(new SimpleGrantedAuthority(user.getRole().name()));
+                return List.of(new SimpleGrantedAuthority(user.getRole().getName()));
             }
 
             @Override
@@ -36,7 +36,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
             @Override
             public String getUsername() {
-                return user.getUserName();
+                return user.getEmail();
             }
         };
     }

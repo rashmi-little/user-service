@@ -48,6 +48,11 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/api/v1/login").permitAll()
+                        . requestMatchers(
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html"
+                        ).permitAll()
                         .requestMatchers("/api/v1/user-service/user/**").hasAnyAuthority("USER", "ADMIN")
                         .requestMatchers("/api/v1/user-service/**").hasAuthority("ADMIN")
                         .anyRequest().authenticated())
