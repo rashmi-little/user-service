@@ -1,0 +1,53 @@
+version: '3.7'
+
+services:
+  mysql:
+    container_name: sqldb
+    image: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: mindfire
+      MYSQL_PASSWORD: mindfire123#
+      MYSQL_DATABASE: project_db
+    ports:
+      - "3307:3306"
+    networks:
+      - sql-web-net
+    restart: unless-stopped
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+  user-service:
+    image: kirtiranjan78/backendimg
+    container_name: backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+      - config
+    networks:
+      - sql-web-net
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    restart: on-failure
+
+  config:
+    image: kirtiranjan78/configimg
+    container_name: config
+    ports:
+      - "8888:8888"
+    depends_on:
+      - mysql
+    networks:
+      - microservice-network
+      - sql-web-net
+    restart: on-failure
+
+networks:
+  sql-web-net:
+    driver: bridge
+  microservice-network:
+    driver: bridge
+
+volumes:
+  mysql-data:
