@@ -62,4 +62,6 @@ public interface UserService {
      * @return UserResponseDto
      */
     UserResponseDto getUserByEmail(String email);
+
+    void changePassword(long id, String newPassword);
 }

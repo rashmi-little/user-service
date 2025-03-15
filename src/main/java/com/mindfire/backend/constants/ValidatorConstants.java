@@ -20,4 +20,5 @@ public class ValidatorConstants {
     public static final String INVALID_PAGE_SIZE = "Page size can't be negative or Zero";
 
     public static final String ROLE_NOT_FOUND = "Role not exists";
+    public static final String TOKEN_NOT_EMPTY = "Token can not be empty";
 }
