@@ -62,7 +62,7 @@ public class UserServiceTests {
 
     @Test
     @DisplayName("delete -(negative) return false if user not found to delete")
-    public void return_false_if_user_not_found() {
+    public void returnFalseIfUserNotFound() {
         long notPresentId = 6;
         // given -- condition or setup
         BDDMockito.given(userRepository.findById(notPresentId)).willReturn(Optional.empty());
@@ -95,7 +95,7 @@ public class UserServiceTests {
 
     @Test
     @DisplayName("getById -(negative) throw exception UserNotFound when user id not present")
-    public void throw_exception_userNotFound_when_id_not_present() {
+    public void throwExceptionUserNotFoundWhenIdNotPresent() {
         long notPresentId = 6;
         // given -- condition or setup
         BDDMockito.given(userRepository.findById(notPresentId)).willReturn(Optional.empty());
@@ -110,7 +110,7 @@ public class UserServiceTests {
 
     @Test
     @DisplayName("getById -(positive) return user data when user id found")
-    public void return_User_when_user_id_found() {
+    public void returnUserWhenUserIdFound() {
         // given -- condition or setup
         BDDMockito.given(userRepository.findById(user.getId())).willReturn(Optional.of(user));
 
@@ -128,7 +128,7 @@ public class UserServiceTests {
 
     @Test
     @DisplayName("getAll -(negative) return empty list when no user present")
-    public void return_empty_list_when_no_user_found() {
+    public void returnEmptyListWhenNoUserFound() {
         // given -- condition or setup
         BDDMockito.given(userRepository.findAll()).willReturn(Collections.emptyList());
 
@@ -142,7 +142,7 @@ public class UserServiceTests {
 
     @Test
     @DisplayName("getAll -(positive) return list of user when users are present")
-    public void return_user_list_when_users_found() {
+    public void returnUserListWhenUsersFound() {
         // given -- condition or setup
         BDDMockito.given(userRepository.findAll()).willReturn(users);
 
@@ -157,7 +157,7 @@ public class UserServiceTests {
 
     @Test
     @DisplayName("getUserByEmail -(negative) throws exception when UserNotFoundException with the given email")
-    public void throws_exception_when_user_email_not_found() {
+    public void throwsExceptionWhenUserEmailNotFound() {
         String notPresentEmail = "notavailable@gmail.com";
         // given -- condition or setup
         BDDMockito.given(userRepository.findByEmail(notPresentEmail)).willReturn(Optional.empty());
@@ -170,7 +170,7 @@ public class UserServiceTests {
 
     @Test
     @DisplayName("getUserByEmail -(positive) return user data of the respective email")
-    public void return_user_when_user_email_found() {
+    public void returnUserWhenUserEmailFound() {
         String presentEmail = user.getEmail();
         // given -- condition or setup
         BDDMockito.given(userRepository.findByEmail(presentEmail)).willReturn(Optional.of(user));
@@ -186,7 +186,7 @@ public class UserServiceTests {
 
     @Test
     @DisplayName("Update -(negative) when user not found with id")
-    public void throws_exception_when_user_id_not_found() {
+    public void throwsExceptionWhenUserIdNotFound() {
         ProfileRequestDto profileRequestDto = new ProfileRequestDto("siva", "Gedela");
         long notPresentId = 6;
         // given -- condition or setup
@@ -203,7 +203,7 @@ public class UserServiceTests {
 
     @Test
     @DisplayName("Update -(positive) check if the save method is called with proper field that are copied from profile request dto")
-    public void perfectly_copy_from_profileDto_to_user() {
+    public void perfectlyCopyFromProfileDtoToUser() {
         ProfileRequestDto profileRequestDto = new ProfileRequestDto("siva", "Gedela");
         long presentId = user.getId();
         // given -- condition or setup
@@ -227,7 +227,7 @@ public class UserServiceTests {
 
     @Test
     @DisplayName("Update -(positive) when user found with id check and update success we are getting the updated value")
-    public void return_update_user_response_when_user_found() {
+    public void returnUpdateUserResponseWhenUserFound() {
         ProfileRequestDto profileRequestDto = new ProfileRequestDto("siva", "Gedela");
         long presentId = user.getId();
         // given -- condition or setup
@@ -246,7 +246,7 @@ public class UserServiceTests {
 
     @Test
     @DisplayName("getPaginatedUser -(negative) throws exception for invalid page")
-    public void should_throw_exception_when_page_number_is_invalid() {
+    public void shouldThrowExceptionWhenPageNumberIsInvalid() {
         // given -- condition or setup
         int invalidPageNumber = 0;
         int pageSize = 10;
@@ -260,7 +260,7 @@ public class UserServiceTests {
 
     @Test
     @DisplayName("getPaginatedUser -(positive) should return paginated data when page number and pagesize are valid")
-    public void should_return_paginated_user_list() {
+    public void shouldReturnPaginatedUserList() {
         // given -- condition or setup
         int pageNumber = 1;
         int pageSize = 1;
@@ -284,7 +284,7 @@ public class UserServiceTests {
 
     @Test
     @DisplayName("getPaginatedUser -(negative) should return empty list when no user found")
-    public void return_empty_list_when_no_user_present() {
+    public void returnEmptyListWhenNoUserPresent() {
         // given -- condition or setup
         int pageNumber = 1;
         int pageSize = 10;
@@ -306,7 +306,7 @@ public class UserServiceTests {
 
     @Test
     @DisplayName("save -(positive) create user and return user response dto")
-    public void return_user_response_dto_on_create_user() {
+    public void returnUserResponseDtoOnCreateUser() {
         // given -- condition or setup
         UserRequestDto userRequestDto = new UserRequestDto(user.getFirstName(), user.getLastName(), user.getEmail());
 

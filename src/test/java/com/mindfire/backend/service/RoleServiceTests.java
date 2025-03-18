@@ -40,7 +40,7 @@ public class RoleServiceTests {
 
     @Test
     @DisplayName("find by name throws exception test")
-    public void throw_exception_when_role_name_not_found() {
+    public void throwExceptionWhenRoleNameNotFound() {
 
         // given -- condition or setup
         BDDMockito.given(roleRepository.findByName("Hello")).willReturn(Optional.empty());
@@ -53,7 +53,7 @@ public class RoleServiceTests {
 
     @Test
     @DisplayName("find by role return role when role found")
-    public void return_role_when_role_name_found() {
+    public void returnRoleWhenRoleNameFound() {
         // given -- condition or setup
         BDDMockito.given(roleRepository.findByName(role.getName())).willReturn(Optional.of(role));
 
