@@ -11,6 +11,6 @@ public record LoginRequestDto(
         String email,
 
         @NotBlank(message = ValidatorConstants.PASSWORD_NOT_EMPTY)
-        @Size(min = 6, message = ValidatorConstants.PASSWORD_SIZE)
+//        @Size(min = 6, message = ValidatorConstants.PASSWORD_SIZE)
         String password) {
 }
