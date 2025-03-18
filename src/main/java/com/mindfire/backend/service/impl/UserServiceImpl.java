@@ -35,13 +35,15 @@ public class UserServiceImpl implements UserService {
 
     private final RoleService roleService;
 
+    private static final String ROLE_USER = "USER";
+
     @Override
     public UserResponseDto create(UserRequestDto userRequestDto) {
         User user = MapHelper.mapToUser(userRequestDto);
 
         user.setPassword(passwordEncoder.encode("mindfire"));
 
-        Role role = roleService.getRoleByName("USER");
+        Role role = roleService.getRoleByName(ROLE_USER);
         user.setRole(role);
 
         User savedUser = userRepository.save(user);
