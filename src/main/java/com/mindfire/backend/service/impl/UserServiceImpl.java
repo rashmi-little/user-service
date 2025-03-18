@@ -54,6 +54,7 @@ public class UserServiceImpl implements UserService {
 
         User savedUser = userRepository.save(user);
 
+        // helps to generate token based on the user email
         PasswordToken savedToken = passwordTokenProvider.generateToken(user.getEmail());
 
         log.info("The password register token is http://localhost:5173/password-reset?token={}", savedToken.getToken());

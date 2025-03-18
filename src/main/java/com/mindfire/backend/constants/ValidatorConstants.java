@@ -21,4 +21,7 @@ public class ValidatorConstants {
 
     public static final String ROLE_NOT_FOUND = "Role not exists";
     public static final String TOKEN_NOT_EMPTY = "Token can not be empty";
+
+    public static final String TOKEN_EXPIRED = "Token Expired";
+    public static final String INVALID_TOKEN = "Invalid Token";
 }
