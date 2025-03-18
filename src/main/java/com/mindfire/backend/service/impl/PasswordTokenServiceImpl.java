@@ -20,7 +20,9 @@ import java.util.stream.Collectors;
 public class PasswordTokenServiceImpl implements PasswordTokenService {
 
     private final PasswordTokenRepository passwordTokenRepository;
+
     private final PasswordTokenProvider passwordTokenProvider;
+
     private final UserService userService;
 
     @Override
@@ -30,15 +32,5 @@ public class PasswordTokenServiceImpl implements PasswordTokenService {
         UserResponseDto userResponseDto = userService.getUserByEmail(savedTokenObject.getUserEmail());
 
         userService.changePassword(userResponseDto.id(), newPassword);
-    }
-
-    // currently it will generate the token after mail
-    // it will simply said in frontend if it registered you will get the link
-
-
-
-    @Override
-    public PasswordToken savePasswordToken(PasswordToken token) {
-        return passwordTokenRepository.save(token);
     }
 }

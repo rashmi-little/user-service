@@ -36,6 +36,8 @@ public class PasswordTokenController {
     public ResponseEntity<String> getResetPasswordToken(@RequestParam String email) {
         String token = passwordTokenProvider.generateToken(email).getToken();
 
+        log.info("The generated toke for the email {} is {}",email,token);
+
         return ResponseEntity.ok(token);
     }
 }

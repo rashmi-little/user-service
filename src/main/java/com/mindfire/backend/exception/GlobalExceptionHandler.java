@@ -18,12 +18,12 @@ public class GlobalExceptionHandler {
      * Handles validation exceptions when arguments are not valid (e.g., @Valid validation errors)
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleInvalidArguements(MethodArgumentNotValidException ex){
-        Map<String, String> map=new HashMap<>();
-        ex.getBindingResult().getFieldErrors().forEach(error->{
+    public ResponseEntity<Map<String, String>> handleInvalidArguements(MethodArgumentNotValidException ex) {
+        Map<String, String> map = new HashMap<>();
+        ex.getBindingResult().getFieldErrors().forEach(error -> {
             map.put(error.getField(), error.getDefaultMessage());
         });
-        return new ResponseEntity<>(map,HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(map, HttpStatus.BAD_REQUEST);
     }
 
     /**
@@ -34,9 +34,10 @@ public class GlobalExceptionHandler {
      * @return a {@link ProblemDetail} with status 404 and the exception message
      */
     @ExceptionHandler(UserNotFoundException.class)
-    public ProblemDetail handleIfUserNotFound(UserNotFoundException ex){
-        return ProblemDetail.forStatusAndDetail(HttpStatus.valueOf(404),ex.getMessage());
+    public ProblemDetail handleIfUserNotFound(UserNotFoundException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.valueOf(404), ex.getMessage());
     }
+
     /**
      * Handles general exceptions thrown in the application.
      * <p>
@@ -50,6 +51,7 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleException(Exception exception) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.valueOf(500), exception.getMessage());
     }
+
     /**
      * Global exception handler for DataIntegrityViolationException.
      * This handler specifically catches violations of unique constraints in the database
@@ -61,11 +63,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ProblemDetail handleDuplicateEntry(DataIntegrityViolationException ex) {
         if (ex.getMessage().contains("UKgj2fy3dcix7ph7k8684gka40c")) {
-            return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST,"This username is already registered. Please try another.");
+            return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "This username is already registered. Please try another.");
         } else if (ex.getMessage().contains("UKob8kqyqqgmefl0aco34akdtpe")) {
-            return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST,"This email is already taken. Please choose another.");
+            return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "This email is already taken. Please choose another.");
         } else {
-            return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST,"A database constraint was violated. Please try again.");
+            return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "A database constraint was violated. Please try again.");
         }
     }
 
@@ -77,10 +79,9 @@ public class GlobalExceptionHandler {
      * @return a {@link ProblemDetail} with status 404 and the exception message
      */
     @ExceptionHandler(RoleNotFoundException.class)
-    public ProblemDetail handleIfRoleNotFound(RoleNotFoundException ex){
-        return ProblemDetail.forStatusAndDetail(HttpStatus.valueOf(404),ex.getMessage());
+    public ProblemDetail handleIfRoleNotFound(RoleNotFoundException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.valueOf(404), ex.getMessage());
     }
-
 
 
     /**
@@ -93,5 +94,29 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BadCredentialsException.class)
     public ProblemDetail handleIfBadCredentials(BadCredentialsException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, "Invalid email  or password");
+    }
+
+    /**
+     * Handles {@link TokenExpiredException} and returns a {@link ProblemDetail} with HTTP 400 status
+     * and the exception message as the detail.
+     *
+     * @param ex the {@link TokenExpiredException} to handle
+     * @return a {@link ProblemDetail} with status 400 and the exception message
+     */
+    @ExceptionHandler(TokenExpiredException.class)
+    public ProblemDetail handleIfUserNotFound(TokenExpiredException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.valueOf(400), ex.getMessage());
+    }
+
+    /**
+     * Handles {@link TokenNotFoundException} and returns a {@link ProblemDetail} with HTTP 404 status
+     * and the exception message as the detail.
+     *
+     * @param ex the {@link TokenNotFoundException} to handle
+     * @return a {@link ProblemDetail} with status 404 and the exception message
+     */
+    @ExceptionHandler(TokenNotFoundException.class)
+    public ProblemDetail handleIfUserNotFound(TokenNotFoundException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.valueOf(404), ex.getMessage());
     }
 }
