@@ -129,8 +129,8 @@ public class UserServiceImpl implements UserService {
     public void changePassword(long id, String newPassword) {
         User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(ValidatorConstants.USER_EMAIL_NOT_FOUND));
 
-        if (passwordEncoder.matches(newPassword, user.getPassword())) {
-            throw new RuntimeException("Old and new password can't be same");
+        if ((user.getPassword() != null && !user.getPassword().isEmpty()) && passwordEncoder.matches(newPassword, user.getPassword())) {
+            throw new RuntimeException(ValidatorConstants.SAME_PASSWORD_ERROR_MESSAGE);
         }
         user.setPassword(passwordEncoder.encode(newPassword));
 
