@@ -25,19 +25,17 @@ public class PasswordTokenController {
     @PostMapping("/reset-password")
     public ResponseEntity<Void> resetPassword(@Valid @RequestBody ResetPasswordRequestDto resetPasswordRequestDto) {
         log.info("reset password token {} new password {}", resetPasswordRequestDto.token(), resetPasswordRequestDto.newPassword());
+
         passwordTokenService.changePassword(resetPasswordRequestDto.token(), resetPasswordRequestDto.newPassword());
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    // we will not be sending the reset token to the frontend we will be sending
-    // token to the registered mail address
-
     @PostMapping("/reset-token")
-    public ResponseEntity<String> getResetPasswordToken(@RequestParam String email) {
+    public ResponseEntity<Void> getResetPasswordToken(@RequestParam String email) {
         String token = passwordTokenProvider.generateToken(email).getToken();
 
-        log.info("The generated toke for the email {} is {}",email,token);
+        log.info("The password register token is http://localhost:5173/password-reset?token={}", token);
 
-        return ResponseEntity.ok(token);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 }
