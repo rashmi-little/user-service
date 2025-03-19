@@ -53,6 +53,7 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/api/v1/login").permitAll()
+                        .requestMatchers("/api/v1/password-service/**").permitAll()
                         . requestMatchers(
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
