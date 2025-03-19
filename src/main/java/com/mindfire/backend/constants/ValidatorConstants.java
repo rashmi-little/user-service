@@ -20,4 +20,10 @@ public class ValidatorConstants {
     public static final String INVALID_PAGE_SIZE = "Page size can't be negative or Zero";
 
     public static final String ROLE_NOT_FOUND = "Role not exists";
+    public static final String TOKEN_NOT_EMPTY = "Token can not be empty";
+
+    public static final String TOKEN_EXPIRED = "Token Expired";
+    public static final String INVALID_TOKEN = "Invalid Token";
+
+    public static final String SAME_PASSWORD_ERROR_MESSAGE = "Old and new password can't be same";
 }

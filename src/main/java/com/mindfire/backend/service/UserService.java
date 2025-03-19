@@ -4,6 +4,7 @@ import com.mindfire.backend.dto.request.ProfileRequestDto;
 import com.mindfire.backend.dto.request.UserRequestDto;
 import com.mindfire.backend.dto.response.PageResponse;
 import com.mindfire.backend.dto.response.UserResponseDto;
+import com.mindfire.backend.exception.UserNotFoundException;
 
 import java.util.List;
 
@@ -62,4 +63,20 @@ public interface UserService {
      * @return UserResponseDto
      */
     UserResponseDto getUserByEmail(String email);
+
+    /**
+     * Changes the password for a user identified by their ID.
+     * <p>
+     * This method first checks if the user exists by searching for their ID. If the user is not found,
+     * a {@link UserNotFoundException} is thrown. If the user's current password is set and matches the new password,
+     * a {@link RuntimeException} is thrown to prevent the user from setting the same password. If the new password is valid,
+     * it is encoded and saved to the user's account.
+     * </p>
+     *
+     * @param id The ID of the user whose password is to be changed.
+     * @param newPassword The new password to set for the user.
+     * @throws UserNotFoundException if no user is found with the given ID.
+     * @throws RuntimeException if the new password is the same as the old password.
+     */
+    void changePassword(long id, String newPassword);
 }
