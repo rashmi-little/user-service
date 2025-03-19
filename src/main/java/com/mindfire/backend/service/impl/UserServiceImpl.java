@@ -2,6 +2,7 @@ package com.mindfire.backend.service.impl;
 
 import com.mindfire.backend.constants.ValidatorConstants;
 import com.mindfire.backend.dto.request.ProfileRequestDto;
+import com.mindfire.backend.dto.response.UserRegistrationEvent;
 import com.mindfire.backend.entity.PasswordToken;
 import com.mindfire.backend.entity.Role;
 import com.mindfire.backend.exception.UserNotFoundException;
@@ -9,6 +10,7 @@ import com.mindfire.backend.dto.request.UserRequestDto;
 import com.mindfire.backend.dto.response.PageResponse;
 import com.mindfire.backend.dto.response.UserResponseDto;
 import com.mindfire.backend.entity.User;
+import com.mindfire.backend.kafka.UserKafkaProducer;
 import com.mindfire.backend.mapper.MapHelper;
 import com.mindfire.backend.repository.PasswordTokenRepository;
 import com.mindfire.backend.repository.UserRepository;
@@ -43,6 +45,8 @@ public class UserServiceImpl implements UserService {
 
     private final PasswordTokenProvider passwordTokenProvider;
 
+    private final UserKafkaProducer userKafkaProducer;
+
     private static final String ROLE_USER = "USER";
 
     @Override
@@ -58,6 +62,10 @@ public class UserServiceImpl implements UserService {
         PasswordToken savedToken = passwordTokenProvider.generateToken(user.getEmail());
 
         log.info("The password register token is http://localhost:5173/password-reset?token={}", savedToken.getToken());
+        String verificationLink = "http://localhost:5173/password-reset?token=" + savedToken.getToken();
+
+        UserRegistrationEvent userRegistrationEvent = new UserRegistrationEvent(user.getEmail(), verificationLink);
+        userKafkaProducer.sendMessage(userRegistrationEvent);
 
         return MapHelper.mapToUserResponse(savedUser);
     }
