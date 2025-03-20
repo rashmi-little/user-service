@@ -2,8 +2,8 @@ package com.mindfire.backend.service.impl;
 
 import com.mindfire.backend.constants.ValidatorConstants;
 import com.mindfire.backend.dto.request.ProfileRequestDto;
-import com.mindfire.backend.dto.response.UserRegistrationEvent;
 import com.mindfire.backend.entity.PasswordToken;
+
 import com.mindfire.backend.entity.Role;
 import com.mindfire.backend.exception.UserNotFoundException;
 import com.mindfire.backend.dto.request.UserRequestDto;
@@ -19,6 +19,8 @@ import com.mindfire.backend.service.PasswordTokenService;
 import com.mindfire.backend.service.RoleService;
 import com.mindfire.backend.service.UserService;
 import com.mindfire.backend.utils.PasswordUtility;
+import com.mindfire.basedomains.dto.UserRegistrationEvent;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -63,9 +65,9 @@ public class UserServiceImpl implements UserService {
 
         log.info("The password register token is http://localhost:5173/password-reset?token={}", savedToken.getToken());
         String verificationLink = "http://localhost:5173/password-reset?token=" + savedToken.getToken();
-
+       
         UserRegistrationEvent userRegistrationEvent = new UserRegistrationEvent(user.getEmail(), verificationLink);
-        userKafkaProducer.sendMessage(userRegistrationEvent);
+        userKafkaProducer.publishUserRegistrationEvent(userRegistrationEvent);
 
         return MapHelper.mapToUserResponse(savedUser);
     }
