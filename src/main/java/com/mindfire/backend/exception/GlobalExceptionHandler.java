@@ -1,5 +1,6 @@
 package com.mindfire.backend.exception;
 
+import com.mindfire.backend.constants.ValidatorConstants;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -8,6 +9,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -118,5 +120,32 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(TokenNotFoundException.class)
     public ProblemDetail handleIfUserNotFound(TokenNotFoundException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.valueOf(404), ex.getMessage());
+    }
+
+    /**
+     * Handles {@link HandlerMethodValidationException} and returns a {@link ResponseEntity} with a
+     * message indicating an invalid email format.
+     *
+     * @param ex the {@link HandlerMethodValidationException} instance
+     * @return a {@link ResponseEntity} with an error message and {@link HttpStatus#BAD_REQUEST}
+     */
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public ResponseEntity<String> handleValidationExceptions(HandlerMethodValidationException ex) {
+
+        return new ResponseEntity<>(ValidatorConstants.EMAIL_INVALID, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * Handles {@link SamePasswordException} when a user attempts to reset their password to the same value as the old one.
+     * <p>
+     * This method returns a {@link ProblemDetail} with a {@link HttpStatus#CONFLICT} (409) status and a message detailing the password conflict.
+     * </p>
+     *
+     * @param ex the {@link SamePasswordException} that was thrown
+     * @return a {@link ProblemDetail} with status 409 and the exception message
+     */
+    @ExceptionHandler(SamePasswordException.class)
+    public ProblemDetail handleIfPasswordConflict(SamePasswordException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.valueOf(409), ex.getMessage());
     }
 }

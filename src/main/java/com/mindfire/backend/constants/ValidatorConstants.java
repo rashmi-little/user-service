@@ -26,4 +26,6 @@ public class ValidatorConstants {
     public static final String INVALID_TOKEN = "Invalid Token";
 
     public static final String SAME_PASSWORD_ERROR_MESSAGE = "Old and new password can't be same";
+
+    public static final String UNREGISTERED_USER = "Email not registered";
 }
