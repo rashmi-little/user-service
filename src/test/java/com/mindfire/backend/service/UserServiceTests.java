@@ -2,11 +2,14 @@ package com.mindfire.backend.service;
 
 import com.mindfire.backend.constants.ValidatorConstants;
 import com.mindfire.backend.dto.request.ProfileRequestDto;
+import com.mindfire.backend.dto.request.ResetPasswordRequestDto;
 import com.mindfire.backend.dto.request.UserRequestDto;
 import com.mindfire.backend.dto.response.PageResponse;
 import com.mindfire.backend.dto.response.UserResponseDto;
+import com.mindfire.backend.entity.PasswordToken;
 import com.mindfire.backend.entity.Role;
 import com.mindfire.backend.entity.User;
+import com.mindfire.backend.exception.SamePasswordException;
 import com.mindfire.backend.exception.UserNotFoundException;
 import com.mindfire.backend.repository.UserRepository;
 import com.mindfire.backend.service.impl.UserServiceImpl;
@@ -23,6 +26,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -42,6 +46,9 @@ public class UserServiceTests {
     @Mock
     private BCryptPasswordEncoder passwordEncoder;
 
+    @Mock
+    private PasswordTokenService passwordTokenService;
+
     @InjectMocks
     private UserServiceImpl userService;
 
@@ -49,15 +56,26 @@ public class UserServiceTests {
 
     private Role role;
 
+    private PasswordToken passwordToken;
+
     private List<User> users;
 
     @BeforeEach
     void setup() {
-        user = User.builder().id(1L).email("rrn@gmail.com").role(Role.builder().id(1L).name("USER").build()).firstName("Rashmi").lastName("Nayak").build();
+        user = User.builder().id(1L).email("rrn@gmail.com").role(Role.builder().id(1L).name("USER").build()).firstName("Rashmi").lastName("Nayak")
+                .password("encoded password").build();
 
         users = List.of(user, User.builder().id(2L).email("latesh@gmail.com").role(Role.builder().id(2L).name("ADMIN").build()).firstName("Latesh").lastName("lokanatham").build(), User.builder().id(3L).email("kirti@gmail.com").role(Role.builder().id(3L).name("USER").build()).firstName("kirti").lastName("Mishra").build());
 
         role = Role.builder().id(1L).name("USER").build();
+
+        passwordToken = PasswordToken.builder()
+                .id(1)
+                .createdTime(LocalDateTime.of(2025, 3, 20, 12, 0))
+                .expirationTime(LocalDateTime.of(2025, 3, 27, 12, 0))
+                .isUsed(false)
+                .token("dummyTokenValue123")
+                .build();
     }
 
     @Test
@@ -311,16 +329,16 @@ public class UserServiceTests {
         UserRequestDto userRequestDto = new UserRequestDto(user.getFirstName(), user.getLastName(), user.getEmail());
 
         BDDMockito.given(roleService.getRoleByName(role.getName())).willReturn(role);
-        BDDMockito.given(passwordEncoder.encode("mindfire")).willReturn("encodedpassword");
         BDDMockito.given(userRepository.save(Mockito.any(User.class))).willReturn(user);
+        BDDMockito.given(passwordTokenService.generateToken(user.getEmail())).willReturn(passwordToken);
 
         // when -- action or behavior that are going to test
         UserResponseDto response = userService.create(userRequestDto);
         // then -- verify the output
 
         BDDMockito.verify(roleService, BDDMockito.times(1)).getRoleByName("USER");
-        BDDMockito.verify(passwordEncoder, BDDMockito.times(1)).encode("mindfire");
         BDDMockito.verify(userRepository, BDDMockito.times(1)).save(Mockito.any(User.class));
+        BDDMockito.verify(passwordTokenService, BDDMockito.times(1)).generateToken(user.getEmail());
 
         assertThat(response).isNotNull();
         assertThat(response.email()).isEqualTo(userRequestDto.email());
@@ -328,4 +346,116 @@ public class UserServiceTests {
         assertThat(response.lastName()).isEqualTo(userRequestDto.lastName());
         assertThat(response.role()).isEqualTo(role.getName());
     }
+
+    @Test
+    @DisplayName("getResetPasswordToken -(negative) throws exception where email not register")
+    public void throwsExceptionWhenEmailNotFound() {
+        // given -- condition or setup
+        String notPresentEmail = "notPresentEmail@gmail.com";
+
+        BDDMockito.given(userRepository.findByEmail(notPresentEmail)).willReturn(Optional.empty());
+
+        //verify
+
+        assertThatThrownBy(() -> {
+            userService.getPasswordResetToken(notPresentEmail);
+        }).isInstanceOf(UserNotFoundException.class).hasMessage(ValidatorConstants.UNREGISTERED_USER);
+
+        BDDMockito.verify(passwordTokenService, BDDMockito.never()).generateToken(user.getEmail());
+    }
+
+    @Test
+    @DisplayName("getResetPasswordToken -(positive) return password token on success")
+    public void returnPasswordTokenOnSuccess() {
+        // given -- condition or setup
+        BDDMockito.given(userRepository.findByEmail(user.getEmail())).willReturn(Optional.of(user));
+        BDDMockito.given(passwordTokenService.generateToken(user.getEmail())).willReturn(passwordToken);
+
+        //when
+        PasswordToken token = userService.getPasswordResetToken(user.getEmail());
+
+        //then
+        BDDMockito.verify(passwordTokenService, BDDMockito.times(1)).generateToken(user.getEmail());
+
+        assertThat(token).isNotNull();
+        assertThat(token.getToken()).isEqualTo(passwordToken.getToken());
+        assertThat(token.getUserEmail()).isEqualTo(passwordToken.getUserEmail());
+        assertThat(token.getCreatedTime()).isEqualTo(passwordToken.getCreatedTime());
+    }
+
+    @Test
+    @DisplayName("changePassword -(negative) should throw UserNotFoundException when user not found")
+    public void shouldThrowUserNotFoundExceptionWhenEmailNotFound() {
+        // given
+        String token = passwordToken.getToken();
+        String newPassword = "newPassword123";
+
+        BDDMockito.given(passwordTokenService.validatePasswordResetToken(token)).willReturn(passwordToken);
+        BDDMockito.given(userRepository.findByEmail(passwordToken.getUserEmail())).willReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> userService.changePassword(new ResetPasswordRequestDto(token, newPassword)))
+                .isInstanceOf(UserNotFoundException.class)
+                .hasMessage(ValidatorConstants.USER_EMAIL_NOT_FOUND);
+
+        // verify no save operations occurred
+        BDDMockito.verify(userRepository, Mockito.never()).save(Mockito.any());
+        BDDMockito.verify(passwordTokenService, Mockito.never()).save(Mockito.any());
+    }
+
+    @Test
+    @DisplayName("changePassword -(negative) should throw SamePasswordException when old and new password are the same")
+    public void shouldThrowSamePasswordExceptionWhenOldAndNewPasswordAreTheSame() {
+        // given
+        String token = passwordToken.getToken();
+        String newPassword = "encoded password";
+
+        log.info("user {}", user);
+        BDDMockito.given(passwordTokenService.validatePasswordResetToken(token)).willReturn(passwordToken);
+        BDDMockito.given(userRepository.findByEmail(passwordToken.getUserEmail())).willReturn(Optional.of(user));
+        BDDMockito.given(passwordEncoder.matches(newPassword, user.getPassword())).willReturn(true);
+
+        // when & then
+        assertThatThrownBy(() ->
+                userService.changePassword(new ResetPasswordRequestDto(token, newPassword)))
+                .isInstanceOf(SamePasswordException.class)
+                .hasMessage(ValidatorConstants.SAME_PASSWORD_ERROR_MESSAGE);
+
+        // verify no save operations occurred
+        BDDMockito.verify(userRepository, Mockito.never()).save(Mockito.any());
+        BDDMockito.verify(passwordTokenService, Mockito.never()).save(Mockito.any());
+    }
+
+    @Test
+    @DisplayName("changePassword -(positive) should change password and save user and token when successful")
+    public void shouldChangePasswordAndSaveUserAndTokenWhenSuccessful() {
+        // given
+        String token = passwordToken.getToken();
+        String newPassword = "newPassword123";
+
+        String oldPassword = user.getPassword();
+
+        BDDMockito.given(passwordTokenService.validatePasswordResetToken(token)).willReturn(passwordToken);
+        BDDMockito.given(userRepository.findByEmail(passwordToken.getUserEmail())).willReturn(Optional.of(user));
+        BDDMockito.given(passwordEncoder.matches(newPassword, user.getPassword())).willReturn(false);
+        BDDMockito.given(passwordEncoder.encode(newPassword)).willReturn("encoded new password");
+        // new password doesn't match current one
+
+        // when
+        userService.changePassword(new ResetPasswordRequestDto(token, newPassword));
+
+        // then
+        BDDMockito.verify(userRepository, Mockito.times(1)).save(user);
+        BDDMockito.verify(passwordTokenService, Mockito.times(1)).save(passwordToken);
+
+        // verify password was correctly encoded
+        BDDMockito.verify(passwordEncoder,Mockito.times(1)).encode(newPassword);
+
+        log.info("old password is {} and new password {}",oldPassword, user.getPassword());
+
+        assertThat(user.getPassword()).isNotEqualTo(oldPassword);
+
+        assertThat(passwordToken.isUsed()).isTrue();
+    }
+
 }
