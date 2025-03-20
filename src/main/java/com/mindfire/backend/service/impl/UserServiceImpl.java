@@ -2,25 +2,23 @@ package com.mindfire.backend.service.impl;
 
 import com.mindfire.backend.constants.ValidatorConstants;
 import com.mindfire.backend.dto.request.ProfileRequestDto;
+import com.mindfire.backend.dto.request.ResetPasswordRequestDto;
 import com.mindfire.backend.entity.PasswordToken;
 import com.mindfire.backend.entity.Role;
+import com.mindfire.backend.exception.SamePasswordException;
 import com.mindfire.backend.exception.UserNotFoundException;
 import com.mindfire.backend.dto.request.UserRequestDto;
 import com.mindfire.backend.dto.response.PageResponse;
 import com.mindfire.backend.dto.response.UserResponseDto;
 import com.mindfire.backend.entity.User;
 import com.mindfire.backend.mapper.MapHelper;
-import com.mindfire.backend.repository.PasswordTokenRepository;
 import com.mindfire.backend.repository.UserRepository;
-import com.mindfire.backend.service.PasswordTokenProvider;
 import com.mindfire.backend.service.PasswordTokenService;
 import com.mindfire.backend.service.RoleService;
 import com.mindfire.backend.service.UserService;
-import com.mindfire.backend.utils.PasswordUtility;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -41,7 +39,7 @@ public class UserServiceImpl implements UserService {
 
     private final RoleService roleService;
 
-    private final PasswordTokenProvider passwordTokenProvider;
+    private final PasswordTokenService passwordTokenService;
 
     private static final String ROLE_USER = "USER";
 
@@ -55,9 +53,9 @@ public class UserServiceImpl implements UserService {
         User savedUser = userRepository.save(user);
 
         // helps to generate token based on the user email
-        PasswordToken savedToken = passwordTokenProvider.generateToken(user.getEmail());
+        PasswordToken savedToken = passwordTokenService.generateToken(user.getEmail());
 
-        log.info("The password register token is http://localhost:5173/password-reset?token={}", savedToken.getToken());
+        log.info("The password register token is http://localhost:5173/reset-password?token={}", savedToken.getToken());
 
         return MapHelper.mapToUserResponse(savedUser);
     }
@@ -126,14 +124,31 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void changePassword(long id, String newPassword) {
-        User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(ValidatorConstants.USER_EMAIL_NOT_FOUND));
+    public void changePassword(ResetPasswordRequestDto resetPasswordRequestDto) {
+        String token = resetPasswordRequestDto.token();
+        String newPassword = resetPasswordRequestDto.newPassword();
+
+        PasswordToken passwordToken = passwordTokenService.validatePasswordResetToken(token);
+        User user = userRepository.findByEmail(passwordToken.getUserEmail()).orElseThrow(() -> new UserNotFoundException(ValidatorConstants.USER_EMAIL_NOT_FOUND));
 
         if ((user.getPassword() != null && !user.getPassword().isEmpty()) && passwordEncoder.matches(newPassword, user.getPassword())) {
-            throw new RuntimeException(ValidatorConstants.SAME_PASSWORD_ERROR_MESSAGE);
+            throw new SamePasswordException(ValidatorConstants.SAME_PASSWORD_ERROR_MESSAGE);
         }
+
         user.setPassword(passwordEncoder.encode(newPassword));
 
         userRepository.save(user);
+
+        passwordToken.setUsed(true);
+
+        passwordTokenService.save(passwordToken);
+    }
+
+    @Override
+    public PasswordToken getPasswordResetToken(String email) {
+        //Check for unregister email
+        userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException(ValidatorConstants.UNREGISTERED_USER));
+
+        return passwordTokenService.generateToken(email);
     }
 }

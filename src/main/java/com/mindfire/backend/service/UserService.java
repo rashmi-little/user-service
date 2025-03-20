@@ -1,10 +1,13 @@
 package com.mindfire.backend.service;
 
 import com.mindfire.backend.dto.request.ProfileRequestDto;
+import com.mindfire.backend.dto.request.ResetPasswordRequestDto;
 import com.mindfire.backend.dto.request.UserRequestDto;
 import com.mindfire.backend.dto.response.PageResponse;
 import com.mindfire.backend.dto.response.UserResponseDto;
+import com.mindfire.backend.entity.PasswordToken;
 import com.mindfire.backend.exception.UserNotFoundException;
+import com.mindfire.backend.exception.SamePasswordException;
 
 import java.util.List;
 
@@ -65,18 +68,29 @@ public interface UserService {
     UserResponseDto getUserByEmail(String email);
 
     /**
-     * Changes the password for a user identified by their ID.
+     * Changes the password of the user based on the provided reset password request.
      * <p>
-     * This method first checks if the user exists by searching for their ID. If the user is not found,
-     * a {@link UserNotFoundException} is thrown. If the user's current password is set and matches the new password,
-     * a {@link RuntimeException} is thrown to prevent the user from setting the same password. If the new password is valid,
-     * it is encoded and saved to the user's account.
+     * This method validates the password reset token, checks if the new password is different from the current one,
+     * and then updates the user's password in the database. If the user has an existing password that matches
+     * the new password, a conflict exception is thrown.
      * </p>
      *
-     * @param id The ID of the user whose password is to be changed.
-     * @param newPassword The new password to set for the user.
-     * @throws UserNotFoundException if no user is found with the given ID.
-     * @throws RuntimeException if the new password is the same as the old password.
+     * @param resetPasswordRequestDto the {@link ResetPasswordRequestDto} containing the password reset token and the new password
+     * @throws UserNotFoundException if the user associated with the password reset token is not found
+     * @throws SamePasswordException if the new password is the same as the old password
      */
-    void changePassword(long id, String newPassword);
+    void changePassword(ResetPasswordRequestDto resetPasswordRequestDto);
+
+    /**
+     * Retrieves the password reset token for a given email address.
+     * <p>
+     * This method generates a password reset token associated with the specified email address.
+     * The token is used for resetting the user's password.
+     * </p>
+     *
+     * @param email the email address of the user requesting a password reset
+     * @return a {@link PasswordToken} containing the token details associated with the specified email
+     * @throws UserNotFoundException if no user is found with the provided email address
+     */
+    PasswordToken getPasswordResetToken(String email);
 }
