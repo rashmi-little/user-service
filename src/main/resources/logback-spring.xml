@@ -1,0 +1,44 @@
+<configuration debug="true" scan="true" scanPeriod="30 seconds">
+    <property name="SERVICE_NAME" value="user-service"/>
+    <property name="LOG_PATH" value="D:/certificatemanagementlogs/${SERVICE_NAME}"/>
+    <property name="LOG_ARCHIVE" value="D:/certificatemanagementlogs/${SERVICE_NAME}/archive"/>
+
+    <appender name="Console-Appender" class="ch.qos.logback.core.ConsoleAppender">
+        <layout>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </layout>
+    </appender>
+
+    <appender name="RollingFile-Appender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/${SERVICE_NAME}.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_ARCHIVE}/${SERVICE_NAME}-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>1MB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="Console-Appender"/>
+        <appender-ref ref="RollingFile-Appender"/>
+    </root>
+
+    <logger name="com.mindfire.backend.service" level="DEBUG">
+        <appender-ref ref="Console-Appender"/>
+        <appender-ref ref="RollingFile-Appender"/>
+    </logger>
+
+    <logger name="org.hibernate.SQL" level="DEBUG">
+        <appender-ref ref="Console-Appender"/>
+        <appender-ref ref="RollingFile-Appender"/>
+    </logger>
+
+    <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="TRACE">
+        <appender-ref ref="Console-Appender"/>
+        <appender-ref ref="RollingFile-Appender"/>
+    </logger>
+
+</configuration>
