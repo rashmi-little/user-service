@@ -64,7 +64,7 @@ public class UserServiceImpl implements UserService {
 
 		String verificationLink = "http://localhost:5173/password-reset?token=" + savedToken.getToken();
 
-		UserRegistrationEvent userRegistrationEvent = new UserRegistrationEvent(user.getEmail(), verificationLink);
+		UserRegistrationEvent userRegistrationEvent = new UserRegistrationEvent(user.getEmail(), verificationLink,savedUser.getFirstName());
 		userKafkaProducer.publishUserRegistrationEvent(userRegistrationEvent);
 
 		return MapHelper.mapToUserResponse(savedUser);
@@ -156,9 +156,14 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public PasswordToken getPasswordResetToken(String email) {
 		// Check for unregister email
-		userRepository.findByEmail(email)
+	 User user=	userRepository.findByEmail(email)
 				.orElseThrow(() -> new UserNotFoundException(ValidatorConstants.UNREGISTERED_USER));
 
-		return passwordTokenService.generateToken(email);
+		 
+		 PasswordToken passwordToken=passwordTokenService.generateToken(email);
+			String verificationLink = "http://localhost:5173/password-reset?token=" + passwordToken.getToken();
+		  UserRegistrationEvent  userRegistrationEvent= new UserRegistrationEvent(email, verificationLink, user.getFirstName());
+		  userKafkaProducer.publishUserRegistrationEvent(userRegistrationEvent);
+		 return passwordToken;
 	}
 }
