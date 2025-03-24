@@ -40,7 +40,8 @@
 
     <root level="INFO">
         <appender-ref ref="Console-Appender"/>
-        <appender-ref ref="RollingFile-Appender"/>
+        <appender-ref ref="RollingFile-Appender_Docker"/>
+        <appender-ref ref="RollingFile-Appender_Local"/>
     </root>
 
 </configuration>
