@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Entity
 @Builder
-public class User {
+public class User extends Auditable{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
