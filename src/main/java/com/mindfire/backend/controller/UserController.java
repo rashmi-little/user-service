@@ -224,4 +224,9 @@ public class UserController {
 
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
+    
+    @GetMapping("/count")
+    public ResponseEntity<Long> getNoOfUser(){
+    	return new ResponseEntity<Long>(userService.countTotalUser(),HttpStatus.OK);
+    }
 }

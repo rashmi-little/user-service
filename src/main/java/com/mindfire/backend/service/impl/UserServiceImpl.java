@@ -17,7 +17,7 @@ import com.mindfire.backend.repository.UserRepository;
 import com.mindfire.backend.service.PasswordTokenService;
 import com.mindfire.backend.service.RoleService;
 import com.mindfire.backend.service.UserService;
-import com.mindfire.basedomains.dto.UserRegistrationEvent;
+import com.mindfire.commonlibraries.dto.UserNotificationEvent;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -64,8 +64,8 @@ public class UserServiceImpl implements UserService {
 
 		String verificationLink = "http://localhost:5173/password-reset?token=" + savedToken.getToken();
 
-		UserRegistrationEvent userRegistrationEvent = new UserRegistrationEvent(user.getEmail(), verificationLink,savedUser.getFirstName());
-		userKafkaProducer.publishUserRegistrationEvent(userRegistrationEvent);
+		UserNotificationEvent userNotificationEvent = new UserNotificationEvent(user.getEmail(), verificationLink,savedUser.getFirstName());
+		userKafkaProducer.publishUserRegistrationEvent(userNotificationEvent);
 
 		return MapHelper.mapToUserResponse(savedUser);
 	}
@@ -162,8 +162,14 @@ public class UserServiceImpl implements UserService {
 		 
 		 PasswordToken passwordToken=passwordTokenService.generateToken(email);
 			String verificationLink = "http://localhost:5173/password-reset?token=" + passwordToken.getToken();
-		  UserRegistrationEvent  userRegistrationEvent= new UserRegistrationEvent(email, verificationLink, user.getFirstName());
-		  userKafkaProducer.publishUserRegistrationEvent(userRegistrationEvent);
+		  UserNotificationEvent  userNotificationEvent= new UserNotificationEvent(email, verificationLink, user.getFirstName());
+		  userKafkaProducer.publishUserRegistrationEvent(userNotificationEvent);
 		 return passwordToken;
+	}
+
+	@Override
+	public long countTotalUser() {
+		
+		return userRepository.countUsers();
 	}
 }

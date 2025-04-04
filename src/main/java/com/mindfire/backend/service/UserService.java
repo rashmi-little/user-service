@@ -93,4 +93,6 @@ public interface UserService {
      * @throws UserNotFoundException if no user is found with the provided email address
      */
     PasswordToken getPasswordResetToken(String email);
+    
+    long countTotalUser();
 }

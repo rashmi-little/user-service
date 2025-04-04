@@ -1,7 +1,5 @@
 package com.mindfire.backend.kafka;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.KafkaHeaders;
@@ -9,7 +7,9 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 
-import com.mindfire.basedomains.dto.UserRegistrationEvent;
+import com.mindfire.commonlibraries.dto.UserNotificationEvent;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -17,7 +17,7 @@ public class UserKafkaProducer {
 
 	private final NewTopic topic;
 
-	private final KafkaTemplate<String, UserRegistrationEvent> kafkaTemplate;
+	private final KafkaTemplate<String, UserNotificationEvent> kafkaTemplate;
 
 	/**
 	 * Publishes a UserRegistrationEvent to the configured Kafka topic. This method
@@ -25,8 +25,8 @@ public class UserKafkaProducer {
 	 *
 	 * @param event the user registration event to be published
 	 */
-	public void publishUserRegistrationEvent(UserRegistrationEvent event) {
-		Message<UserRegistrationEvent> message = MessageBuilder.withPayload(event)
+	public void publishUserRegistrationEvent(UserNotificationEvent event) {
+		Message<UserNotificationEvent> message = MessageBuilder.withPayload(event)
 				.setHeader(KafkaHeaders.TOPIC, topic.name()).build();
 		kafkaTemplate.send(message);
 	}
