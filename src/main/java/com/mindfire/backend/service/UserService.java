@@ -8,6 +8,7 @@ import com.mindfire.backend.dto.response.UserResponseDto;
 import com.mindfire.backend.entity.PasswordToken;
 import com.mindfire.backend.exception.UserNotFoundException;
 import com.mindfire.backend.exception.SamePasswordException;
+import java.time.LocalDate;
 
 import java.util.List;
 
@@ -94,5 +95,12 @@ public interface UserService {
      */
     PasswordToken getPasswordResetToken(String email);
     
-    long countTotalUser();
+    /**
+     * Counts the number of new users registered within the given date range.
+     *
+     * @param startDate the start date of the period (inclusive)
+     * @param endDate the end date of the period (inclusive)
+     * @return the number of new users registered within the specified period
+     */
+    long countNewUser(LocalDate startDate, LocalDate endDate);
 }

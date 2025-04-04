@@ -28,6 +28,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -168,8 +169,9 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public long countTotalUser() {
-		
-		return userRepository.countUsers();
+	public long countNewUser(LocalDate startDate, LocalDate endDate) {
+		return userRepository.countUsers(startDate, endDate);
 	}
+
+	
 }
