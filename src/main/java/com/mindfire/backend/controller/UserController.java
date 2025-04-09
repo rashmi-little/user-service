@@ -17,11 +17,14 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -223,5 +226,10 @@ public class UserController {
         log.info("The password register token is http://localhost:5173/reset-password?token={}", token);
 
         return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+    
+    @GetMapping("/countUsers")
+    public ResponseEntity<Long> getNoOfUser(@RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate, @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate){
+    	return new ResponseEntity<Long>(userService.countNewUser(startDate, endDate),HttpStatus.OK);
     }
 }
